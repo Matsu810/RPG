@@ -9,6 +9,7 @@ public class wizardCon : MonoBehaviour
     [SerializeField] private float MoveSpeed = 5.5f;
     private int jumpcount = 0;
     private Rigidbody2D rb;
+    private SpriteRenderer playerSprite;
     public float gravityScale = 2f; // 重力スケール
     private bool isGrounded = true;// 地面を踏んでいるかどうかのフラグ
 
@@ -20,6 +21,7 @@ public class wizardCon : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>(); // Rigidbody2Dコンポーネントを取得
+        playerSprite = GetComponent<SpriteRenderer>();
         rb.gravityScale = gravityScale; // Rigidbody2Dの重力スケールを設定
 
     }
@@ -31,14 +33,10 @@ public class wizardCon : MonoBehaviour
         float moveInput = Input.GetAxis("Horizontal"); // 左右の入力を取得
         rb.velocity = new Vector2(moveInput * MoveSpeed, rb.velocity.y); // 水平方向の速度を設定
         // 左右の入力に応じてキャラクターの向きを変更
-        if (moveInput > 0)
-        {
-            transform.localScale = new Vector3(1, 1, 1); // 右向き
-        }
-        else if (moveInput < 0)
-        {
-            transform.localScale = new Vector3(-1, 1, 1); // 左向き
-        }
+        if(moveInput != 0) playerSprite.flipX = moveInput < 0; // 左向きならスプライトを反転
+        int flipPoint = playerSprite.flipX ? -1 : 1; // プレイヤーの向きに応じてフリップポイントを設定
+        magicPoint.localPosition = new Vector2(flipPoint * Mathf.Abs(magicPoint.localPosition.x), magicPoint.localPosition.y);
+
         // ジャンプ処理
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -66,11 +64,17 @@ public class wizardCon : MonoBehaviour
         // 魔法の弾を生成
         GameObject magic = Instantiate(magicPrefab, magicPoint.position, Quaternion.identity);
         Rigidbody2D magicRb = magic.GetComponent<Rigidbody2D>();
+        SpriteRenderer sprite = magic.GetComponent<SpriteRenderer>(); // スプライトを取得（必要に応じて）
+        sprite.flipX = playerSprite.flipX; // プレイヤーの向きに応じてスプライトを反転
         if (magicRb != null)
         {
             // 魔法の弾に力を加える
 
-            magicRb.velocity = new Vector2(10f, 0f); // 右方向に発射
+            float direction = playerSprite.flipX ? -1: 1; // プレイヤーの向きに応じて方向を決定
+            //弾を射出
+            magicRb.velocity = new Vector2(direction * 10f, 0f); // プレイヤーの向きに応じて発射
+
+            //magicRb.velocity = new Vector2(10f, 0f); // 右方向に発射
         }
     }
 }
