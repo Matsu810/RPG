@@ -51,8 +51,8 @@ public class Enemy : MonoBehaviour
         
 
     }
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
+    private void OnTriggerEnter2D(Collider2D collision)
+    { 
         if (collision.gameObject.CompareTag("Attack"))
         {
             Debug.Log("Enemy hit by attack!"); // UŒ‚‚É“–‚½‚Á‚½‚çƒƒO‚ğo—Í

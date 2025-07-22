@@ -48,7 +48,22 @@ public class PoliceCon : MonoBehaviour
         }
 
     }
-
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true; // 地面に接触したら地面を踏んでいる
+            jumpcount = 0; // ジャンプカウントをリセット
+        }
+        
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log("Player hit by enemy!"); // 敵に当たったらログを出力
+        }
+    }
     private void FixedUpdate()
     {
         if (isAttack)
