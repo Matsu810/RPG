@@ -9,7 +9,7 @@ public class PoliceCon : MonoBehaviour
     [SerializeField] private float JumpSpeed = 5.0f;
     [SerializeField] private float MoveSpeed = 5.5f;
     private int jumpcount = 0;
-    private Rigidbody2D rb;
+    private Rigidbody rb;
     private SpriteRenderer playerSprite;
     public float gravityScale = 0f; // 重力スケール
     private bool isGrounded = true;// 地面を踏んでいるかどうかのフラグ
@@ -26,9 +26,9 @@ public class PoliceCon : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>(); // Rigidbody2Dコンポーネントを取得
+        rb = GetComponent<Rigidbody>(); // Rigidbody2Dコンポーネントを取得
         playerSprite = GetComponent<SpriteRenderer>();
-        rb.gravityScale = gravityScale; // Rigidbody2Dの重力スケールを設定
+       // rb.gravityScale = gravityScale; // Rigidbody2Dの重力スケールを設定
     }
 
     // Update is called once per frame
