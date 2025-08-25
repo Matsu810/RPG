@@ -1,96 +1,56 @@
 using UnityEngine;
-using System.Collections;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class PoliceCon : MonoBehaviour
 {
 	public float moveSpeed = 5f;
-	public float jumpForce = 7f;
+	public string horizontalAxis = "Horizontal";
+	public string verticalAxis = "Vertical";
 
-	public GameObject attackCollider;    
+	Rigidbody2D rb;
+	LayerMask floorMask;
 
-	public float attackDuration = 0.3f;
-
-	private Rigidbody rb;
-	private bool isGrounded = false;
-	private bool isAttacking = false;
-
-	void Start()
+	void Awake()
 	{
-		rb = GetComponent<Rigidbody>();
-		if (attackCollider != null)
+		rb = GetComponent<Rigidbody2D>();
+		rb.gravityScale = 0f;
+		rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+		// Floorレイヤーだけを判定対象に
+		floorMask = LayerMask.GetMask("Floor");
+	}
+
+	void FixedUpdate()
+	{
+		float h = Input.GetAxisRaw(horizontalAxis);
+		float v = Input.GetAxisRaw(verticalAxis);
+
+		Vector2 input = new Vector2(h, v);
+
+		// 斜め移動の速度を一定に
+		if (input.sqrMagnitude > 1f)
+			input = input.normalized;
+
+		// 移動先を計算
+		Vector2 nextPos = rb.position + input * moveSpeed * Time.fixedDeltaTime;
+
+		// 次の位置が床の上なら進む
+		if (CanMoveTo(nextPos))
 		{
-			attackCollider.SetActive(false);
+			rb.velocity = input * moveSpeed;
+		}
+		else
+		{
+			rb.velocity = Vector2.zero;
 		}
 	}
 
-	void Update()
+	bool CanMoveTo(Vector2 targetPos)
 	{
-		Move();
-		Jump();
+		// 足元のちょっと下を判定
+		float checkRadius = 0.05f;
+		Collider2D hit = Physics2D.OverlapCircle(targetPos, checkRadius, floorMask);
 
-		if (Input.GetKeyDown(KeyCode.F) && !isAttacking)
-		{
-			StartCoroutine(DoAttack());
-		}
-	}
-
-	void Move()
-	{
-		float h = Input.GetAxisRaw("Horizontal");
-		float v = Input.GetAxisRaw("Vertical");
-
-		Vector3 dir = new Vector3(h, 0f, v).normalized;
-
-		if (dir.magnitude > 0)
-		{
-			transform.position += dir * moveSpeed * Time.deltaTime;
-			// transform.forward = dir;
-		}
-	}
-
-	void Jump()
-	{
-		if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-		{
-			rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-			isGrounded = false;
-		}
-	}
-
-	IEnumerator DoAttack()
-	{
-		isAttacking = true;
-
-		if (attackCollider != null)
-		{
-			attackCollider.SetActive(true);
-		}
-
-		yield return new WaitForSeconds(attackDuration);
-
-		if (attackCollider != null)
-		{
-			attackCollider.SetActive(false);
-		}
-
-		isAttacking = false;
-	}
-
-	void OnCollisionEnter(Collision collision)
-	{
-		if (collision.gameObject.CompareTag("Ground"))
-		{
-			isGrounded = true;
-		}
-	}
-
-	//  Gizmoを描画する（Inspectorで選択中のみ）
-	void OnDrawGizmosSelected()
-	{
-		if (attackCollider != null)
-		{
-			Gizmos.color = Color.red;
-			Gizmos.DrawWireCube(attackCollider.transform.position, attackCollider.transform.localScale);
-		}
+		return hit != null && hit.CompareTag("floor");
 	}
 }
