@@ -10,6 +10,9 @@ public class wizardCon : MonoBehaviour
 	[SerializeField] private float JumpSpeed = 5.0f;
 	[SerializeField] private float MoveSpeed = 5.5f;
 	[SerializeField] private float gravityScale = 2f;
+	[SerializeField] private float invincibleTime = 1.5f; // 無敵時間
+	[SerializeField] private float flashInterval = 0.1f;  // 点滅間隔
+
 
 	private int jumpcount = 0;
 	private Rigidbody2D rb;
@@ -22,6 +25,7 @@ public class wizardCon : MonoBehaviour
 	private bool isDashing = false;
 	private float dashTimer = 0f;
 	private float originalGravity;
+	private bool isInvincible = false;
 
 	[SerializeField] private GameObject magicPrefab;
 	[SerializeField] private Transform magicPoint;
@@ -149,8 +153,36 @@ public class wizardCon : MonoBehaviour
 			jumpcount = 0;
 			dashUsed = false;
 		}
+		// 敵やボスに触れたら被弾
+		if (!isInvincible && (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Boss")))
+		{
+			TakeDamage();
+		}
+	}
+	private void TakeDamage()
+	{
+		// 上方向に吹っ飛ぶ（ジャンプと同じ強さ）
+		rb.velocity = new Vector2(rb.velocity.x, JumpSpeed);
+
+		// 無敵状態にして点滅開始
+		StartCoroutine(DamageFlash());
 	}
 
+	private IEnumerator DamageFlash()
+	{
+		isInvincible = true;
+		float timer = 0f;
+
+		while (timer < invincibleTime)
+		{
+			playerSprite.enabled = !playerSprite.enabled; // 点滅
+			yield return new WaitForSeconds(flashInterval);
+			timer += flashInterval;
+		}
+
+		playerSprite.enabled = true; // 最後に表示を戻す
+		isInvincible = false;
+	}
 	private void Shoot(GameObject magicPrefab)
 	{
 		GameObject magic = Instantiate(magicPrefab, magicPoint.position, Quaternion.identity);
