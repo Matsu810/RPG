@@ -17,6 +17,8 @@ public class Boss : MonoBehaviour
 	private Rigidbody2D rb;
 	private GameObject player;
 	private SpriteRenderer spriteRenderer;
+	private SpriteRenderer bossSprite;
+
 
 	private enum ActionType { None, Tackle, Shoot }
 	private ActionType lastAction = ActionType.None;
@@ -36,22 +38,12 @@ public class Boss : MonoBehaviour
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		player = GameObject.FindGameObjectWithTag("Player");
 		StartCoroutine(ActionLoop());
+		bossSprite = GetComponent<SpriteRenderer>();
 	}
 	void Update()
 	{
-		// プレイヤーが存在するなら方向を合わせる
-		GameObject player = GameObject.FindGameObjectWithTag("Player");
-		if (player != null)
-		{
-			if (player.transform.position.x > transform.position.x)
-			{
-				spriteRenderer.flipX = false; // 右向き
-			}
-			else
-			{
-				spriteRenderer.flipX = true; // 左向き
-			}
-		}
+	
+		UpdateFacing();
 	}
 
 	private IEnumerator ShootAtPlayer()
@@ -73,6 +65,23 @@ public class Boss : MonoBehaviour
 
 		yield return null;
 	}
+
+	private void UpdateFacing()
+	{
+		if (player == null) return;
+
+		// プレイヤーが右にいれば右向き、左なら左向き
+		if (player.transform.position.x > transform.position.x)
+		{
+			bossSprite.flipX = true; // 右向き
+		}
+		else
+		{
+			bossSprite.flipX = false;  // 左向き
+		}
+	}
+
+
 	private IEnumerator ActionLoop()
 	{
 		while (true)
@@ -190,7 +199,10 @@ public class Boss : MonoBehaviour
 	{
 		isAttacking = false;
 		isStunned = true;
-		rb.velocity = Vector2.zero;
+
+		// 体当たり直後は停止する代わりに、少し後ろにノックバック
+		float knockbackDir = bossSprite.flipX ? 2 : -3; // 向いている方向と逆にノックバック
+		rb.velocity = new Vector2(knockbackDir * 3f, rb.velocity.y);
 
 		// 白点滅開始
 		if (flashRoutine != null) StopCoroutine(flashRoutine);
@@ -202,6 +214,9 @@ public class Boss : MonoBehaviour
 
 		// 元の色に戻す
 		spriteRenderer.color = Color.white;
+
+		// 硬直解除後に完全に停止（再度動き出すのは次のActionLoopで決定）
+		rb.velocity = Vector2.zero;
 	}
 
 	private void TakeDamage(int damage)

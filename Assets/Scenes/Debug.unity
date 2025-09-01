@@ -580,7 +580,7 @@ Transform:
   m_GameObject: {fileID: 205985805}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.69400007, y: -0.034000397, z: -0.06118622}
+  m_LocalPosition: {x: -0.05, y: -0.034000397, z: -0.06118622}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4199,7 +4199,8 @@ MonoBehaviour:
   tackleDuration: 4
   stunDuration: 3
   jumpForce: 12
-  bossShotPrefab: {fileID: 0}
+  bossShotPrefab: {fileID: 2503373229596315308, guid: 596a935396eca51459941d4f416bfdf1,
+    type: 3}
   shotPoint: {fileID: 205985806}
   shotInterval: 0.5
   maxShots: 3
@@ -4911,7 +4912,7 @@ PrefabInstance:
     - target: {fileID: 6256106454835615631, guid: ffa031c9e35028341813d84e323fb855,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 30.898037
+      value: 30.969
       objectReference: {fileID: 0}
     - target: {fileID: 6256106454835615631, guid: ffa031c9e35028341813d84e323fb855,
         type: 3}
@@ -7034,7 +7035,7 @@ PrefabInstance:
     - target: {fileID: 1105896829377686519, guid: 99e71f0f114517342bd63181e4300422,
         type: 3}
       propertyPath: m_Name
-      value: BlobPlayer_Blue_3
+      value: player
       objectReference: {fileID: 0}
     - target: {fileID: 2796834086758080961, guid: 99e71f0f114517342bd63181e4300422,
         type: 3}

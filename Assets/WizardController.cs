@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class wizardCon : MonoBehaviour
 {
+	[SerializeField] private int maxHP = 5;   // 最大HP
 	[SerializeField] private float dashSpeed = 15f;
 	[SerializeField] private float dashDuration = 0.20f; // ダッシュ時間
 	[SerializeField] private float doubleTapTime = 0.3f; // 2回押しの間隔
@@ -14,6 +15,8 @@ public class wizardCon : MonoBehaviour
 	[SerializeField] private float flashInterval = 0.1f;  // 点滅間隔
 
 
+	private int currentHP;                    // 現在HP
+	private bool isDead = false;
 	private int jumpcount = 0;
 	private Rigidbody2D rb;
 	private SpriteRenderer playerSprite;
@@ -36,6 +39,7 @@ public class wizardCon : MonoBehaviour
 		playerSprite = GetComponent<SpriteRenderer>();
 		rb.gravityScale = gravityScale;
 		originalGravity = gravityScale;
+		currentHP = maxHP; // HP初期化
 	}
 
 	void Update()
@@ -121,6 +125,7 @@ public class wizardCon : MonoBehaviour
 	}
 
 
+
 	private void StartDash(int direction)
 	{
 		isDashing = true;
@@ -156,14 +161,22 @@ public class wizardCon : MonoBehaviour
 		// 敵やボスに触れたら被弾
 		if (!isInvincible && (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Boss")))
 		{
-			TakeDamage();
+			TakeDamage(1);
 		}
 	}
-	private void TakeDamage()
+	private void TakeDamage(int damage)
 	{
+		if (isDead) return; // すでに死亡済みなら無視
+
+		currentHP -= damage;
+		Debug.Log("Player HP: " + currentHP);
 		// 上方向に吹っ飛ぶ（ジャンプと同じ強さ）
 		rb.velocity = new Vector2(rb.velocity.x, JumpSpeed);
 
+		if (currentHP <= 0)
+		{
+			Die();
+		}
 		// 無敵状態にして点滅開始
 		StartCoroutine(DamageFlash());
 	}
@@ -182,6 +195,19 @@ public class wizardCon : MonoBehaviour
 
 		playerSprite.enabled = true; // 最後に表示を戻す
 		isInvincible = false;
+	}
+	private void Die()
+	{
+		isDead = true;
+		// このスクリプトを止める
+		this.enabled = false;
+		// レンダリング消去
+		playerSprite.enabled = false;
+
+		// デバッグログ
+		Debug.Log("Game Over");
+
+		// TODO: ゲームオーバーUIを表示したりリトライ処理を入れる余地あり
 	}
 	private void Shoot(GameObject magicPrefab)
 	{
