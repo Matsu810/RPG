@@ -13,7 +13,9 @@ public class Boss : MonoBehaviour
 	[SerializeField] private float shotInterval = 0.75f;
 	[SerializeField] private int maxShots = 3;
 	[SerializeField] private float shotSpeed = 12f;
-
+	[SerializeField] private int maxHealth = 10;
+	
+	private int currentHealth;
 	private Rigidbody2D rb;
 	private GameObject player;
 	private SpriteRenderer spriteRenderer;
@@ -39,6 +41,7 @@ public class Boss : MonoBehaviour
 		player = GameObject.FindGameObjectWithTag("Player");
 		StartCoroutine(ActionLoop());
 		bossSprite = GetComponent<SpriteRenderer>();
+		currentHealth = maxHealth;
 	}
 	void Update()
 	{
@@ -163,6 +166,20 @@ public class Boss : MonoBehaviour
 
 		isAttacking = false;
 	}
+	private void OnTriggerEnter2D(Collider2D other)
+	{
+		
+		// 攻撃を受けたらダメージ処理
+		if (other.CompareTag("Attack"))
+		{
+			if (isStunned)
+			{
+				TakeDamage(1);
+			}
+
+			Destroy(other.gameObject); // 攻撃オブジェクトは消す
+		}
+	}
 
 	private void OnCollisionEnter2D(Collision2D collision)
 	{
@@ -178,12 +195,7 @@ public class Boss : MonoBehaviour
 			StartCoroutine(Stun());
 		}
 
-		// 攻撃を受けたらダメージ処理
-		if (collision.gameObject.CompareTag("Attack"))
-		{
-			TakeDamage(1);
-			Destroy(collision.gameObject);
-		}
+		
 	}
 
 	private void OnCollisionExit2D(Collision2D collision)
@@ -222,22 +234,25 @@ public class Boss : MonoBehaviour
 
 	private void TakeDamage(int damage)
 	{
-		health -= damage;
-		Debug.Log("Boss HP: " + health);
+		if (!isStunned) return;
+		if (currentHealth <= 0) return;
+		currentHealth -= damage;
+		Debug.Log("Boss HP: " + currentHealth);
+		// 硬直中に攻撃されたら赤点滅
+		if (flashRoutine != null) StopCoroutine(flashRoutine);
+		flashRoutine = StartCoroutine(Flash(Color.red, 0.5f));
 
-		if (isStunned)
-		{
-			// 硬直中に攻撃されたら赤点滅
-			if (flashRoutine != null) StopCoroutine(flashRoutine);
-			flashRoutine = StartCoroutine(Flash(Color.red, 0.5f));
-		}
 
-		if (health <= 0)
+		if (currentHealth <= 0)
 		{
-			Destroy(gameObject);
+			Die();
 		}
 	}
-
+	private void Die()
+	{
+		Debug.Log("Boss Defeated!");
+		Destroy(gameObject);
+	}
 	private IEnumerator Flash(Color flashColor, float duration)
 	{
 		float timer = 0f;
