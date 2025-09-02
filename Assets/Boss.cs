@@ -199,10 +199,11 @@ public class Boss : MonoBehaviour
 	{
 		isAttacking = false;
 		isStunned = true;
-
+		
 		// 体当たり直後は停止する代わりに、少し後ろにノックバック
-		float knockbackDir = bossSprite.flipX ? 2 : -3; // 向いている方向と逆にノックバック
-		rb.velocity = new Vector2(knockbackDir * 3f, rb.velocity.y);
+		float knockbackDir = bossSprite.flipX ? 2 : 3; // 向いている方向と逆にノックバック
+		Debug.Log("Knockback Dir: " + knockbackDir);
+        rb.velocity = new Vector2(knockbackDir * 3f, rb.velocity.y);
 
 		// 白点滅開始
 		if (flashRoutine != null) StopCoroutine(flashRoutine);
