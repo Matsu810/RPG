@@ -1,3 +1,4 @@
+using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +14,7 @@ public class wizardCon : MonoBehaviour
 	[SerializeField] private float gravityScale = 2f;
 	[SerializeField] private float invincibleTime = 1.5f; // 無敵時間
 	[SerializeField] private float flashInterval = 0.1f;  // 点滅間隔
-
+	[SerializeField] private TextMeshProUGUI hpText;
 
 	private int currentHP;                    // 現在HP
 	private bool isDead = false;
@@ -40,6 +41,7 @@ public class wizardCon : MonoBehaviour
 		rb.gravityScale = gravityScale;
 		originalGravity = gravityScale;
 		currentHP = maxHP; // HP初期化
+		UpdateHPUI(); // UI更新
 	}
 
 	void Update()
@@ -62,9 +64,20 @@ public class wizardCon : MonoBehaviour
 			}
 
 			// 左右の向き反転
-			if (moveInput != 0) playerSprite.flipX = moveInput < 0;
-			int flipPoint = playerSprite.flipX ? -1 : 1;
-			magicPoint.localPosition = new Vector2(flipPoint * Mathf.Abs(magicPoint.localPosition.x), magicPoint.localPosition.y);
+			if (moveInput != 0)
+			{
+				// プレイヤー本体の反転
+				Vector3 scale = transform.localScale;
+				scale.x = moveInput > 0 ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
+				transform.localScale = scale;
+
+				// MagicPointの位置も反転
+				Vector3 magicPos = magicPoint.localPosition;
+				magicPos.x = Mathf.Abs(magicPos.x) * (scale.x > 0 ? 1 : -1);
+				magicPoint.localPosition = magicPos;
+			}
+
+
 		}
 		else
 		{
@@ -170,6 +183,7 @@ public class wizardCon : MonoBehaviour
 
 		currentHP -= damage;
 		Debug.Log("Player HP: " + currentHP);
+		UpdateHPUI();
 		// 上方向に吹っ飛ぶ（ジャンプと同じ強さ）
 		rb.velocity = new Vector2(rb.velocity.x, JumpSpeed);
 
@@ -180,7 +194,13 @@ public class wizardCon : MonoBehaviour
 		// 無敵状態にして点滅開始
 		StartCoroutine(DamageFlash());
 	}
-
+	private void UpdateHPUI()
+	{
+		if (hpText != null)
+		{
+			hpText.text = "HP: " + currentHP.ToString();
+		}
+	}
 	private IEnumerator DamageFlash()
 	{
 		isInvincible = true;
@@ -203,7 +223,8 @@ public class wizardCon : MonoBehaviour
 		this.enabled = false;
 		// レンダリング消去
 		playerSprite.enabled = false;
-
+		if (hpText != null)
+			hpText.text = "HP: 0";
 		// デバッグログ
 		Debug.Log("Game Over");
 
@@ -213,12 +234,12 @@ public class wizardCon : MonoBehaviour
 	{
 		GameObject magic = Instantiate(magicPrefab, magicPoint.position, Quaternion.identity);
 		Rigidbody2D magicRb = magic.GetComponent<Rigidbody2D>();
-		SpriteRenderer sprite = magic.GetComponent<SpriteRenderer>();
-		sprite.flipX = playerSprite.flipX;
+
 		if (magicRb != null)
 		{
-			float direction = playerSprite.flipX ? -1 : 1;
+			float direction = transform.localScale.x > 0 ? 1 : -1;
 			magicRb.velocity = new Vector2(direction * 10f, 0f);
 		}
 	}
+
 }
