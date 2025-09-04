@@ -11,6 +11,7 @@ public class ButtonItem : MonoBehaviour
 		{
 			Debug.Log("ボタンに触れた！シーン遷移します。");
 			SceneManager.LoadScene(nextSceneName);
-		}
+			Destroy(this); // ボタンを消す
+        }
 	}
 }

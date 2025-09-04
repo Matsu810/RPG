@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 public class EnemyLight : MonoBehaviour
 {
 	public float rotationSpeed = 45f; // ライトが回転する速度
@@ -20,7 +21,9 @@ public class EnemyLight : MonoBehaviour
 			if (playerStayTime >= 0.5f)
 			{
 				Debug.Log("アウト！");
-				playerStayTime = 0f; // 一度だけ表示するならこの行は不要
+				// このシーンをリスタート
+				SceneManager.LoadScene("TopGame");
+               
 			}
 		}
 	}

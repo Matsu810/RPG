@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Boss : MonoBehaviour
 {
@@ -14,8 +15,8 @@ public class Boss : MonoBehaviour
 	[SerializeField] private int maxShots = 3;
 	[SerializeField] private float shotSpeed = 12f;
 	[SerializeField] private int maxHealth = 10;
-	
-	private int currentHealth;
+
+    private int currentHealth;
 	private Rigidbody2D rb;
 	private GameObject player;
 	private SpriteRenderer spriteRenderer;
@@ -48,7 +49,7 @@ public class Boss : MonoBehaviour
 	
 		UpdateFacing();
 	}
-
+	/*
 	private IEnumerator ShootAtPlayer()
 	{
 		GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -67,7 +68,7 @@ public class Boss : MonoBehaviour
 		}
 
 		yield return null;
-	}
+	}*/
 
 	private void UpdateFacing()
 	{
@@ -245,15 +246,22 @@ public class Boss : MonoBehaviour
 
 		if (currentHealth <= 0)
 		{
-			Die();
+           
+            GameManager.Instance.SetBossDied();
+
+            StartCoroutine(LoadClearSceneAfterDelay(1.5f)); // 1.5ïbå„Ç…âÊñ ëJà⁄
+            Die();
 		}
 	}
 	private void Die()
 	{
 		Debug.Log("Boss Defeated!");
-		Destroy(gameObject);
-	}
-	private IEnumerator Flash(Color flashColor, float duration)
+        //rendererÇè¡Ç∑
+		bossSprite.enabled = false;
+        //É{ÉXÇÃìñÇΩÇËîªíËÇè¡Ç∑
+		Collider2D col = GetComponent<Collider2D>();
+    }
+    private IEnumerator Flash(Color flashColor, float duration)
 	{
 		float timer = 0f;
 		bool visible = true;
@@ -269,4 +277,9 @@ public class Boss : MonoBehaviour
 
 		spriteRenderer.color = Color.white; // ç≈å„Ç…ñﬂÇ∑
 	}
+    private IEnumerator LoadClearSceneAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene("LastScene");
+    }
 }
